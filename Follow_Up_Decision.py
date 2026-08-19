@@ -1,0 +1,282 @@
+import json
+
+from dotenv import load_dotenv
+from langchain_groq import ChatGroq
+
+from State import AgentPrepState
+
+
+# --------------------------------------------------
+# Load environment variables
+# --------------------------------------------------
+
+load_dotenv()
+
+
+# --------------------------------------------------
+# Groq LLM
+# --------------------------------------------------
+
+llm = ChatGroq(
+    model="openai/gpt-oss-120b",
+    temperature=0
+)
+
+
+# --------------------------------------------------
+# Follow-up Decision Agent
+# --------------------------------------------------
+
+def follow_up_decision_agent(state: AgentPrepState) -> dict:
+    """
+    Decides whether the next question should:
+
+    1. Follow up on the current topic
+    2. Move to a new topic
+
+    It does NOT generate the question.
+
+    The Question Generator will generate the actual question.
+    """
+
+    # --------------------------------------------------
+    # 1. Read current state
+    # --------------------------------------------------
+
+    question = state.get(
+        "current_question",
+        ""
+    )
+
+    answer = state.get(
+        "current_answer",
+        ""
+    )
+
+    current_topic = state.get(
+        "current_topic",
+        ""
+    )
+
+    score = state.get(
+        "score",
+        0
+    )
+
+    feedback = state.get(
+        "feedback",
+        ""
+    )
+
+    weaknesses = state.get(
+        "weaknesses",
+        []
+    )
+
+    skills = state.get(
+        "skills",
+        []
+    )
+
+    project_summary = state.get(
+        "project_summary",
+        ""
+    )
+
+    topic_history = state.get(
+        "topic_history",
+        []
+    )
+
+    question_history = state.get(
+        "question_history",
+        []
+    )
+
+    follow_up_count = state.get(
+        "follow_up_count",
+        0
+    )
+
+
+    # --------------------------------------------------
+    # 2. Topics already covered
+    # --------------------------------------------------
+
+    if topic_history:
+
+        covered_topics = "\n".join(
+            f"- {topic}"
+            for topic in topic_history
+        )
+
+    else:
+
+        covered_topics = "None"
+
+
+    # --------------------------------------------------
+    # 3. Previously asked questions
+    # --------------------------------------------------
+
+    if question_history:
+
+        previous_questions = "\n".join(
+            f"- {q}"
+            for q in question_history[-10:]
+        )
+
+    else:
+
+        previous_questions = "None"
+
+
+    # --------------------------------------------------
+    # 4. Build prompt
+    # --------------------------------------------------
+
+    prompt = f"""
+You are an intelligent technical interview controller.
+
+Your job is to decide what the interviewer should do NEXT.
+
+You have the candidate's latest question, answer, evaluation,
+resume information, and interview history.
+
+Candidate skills:
+{", ".join(skills)}
+
+Candidate project information:
+{project_summary}
+
+Current topic:
+{current_topic}
+
+Current question:
+{question}
+
+Candidate answer:
+{answer}
+
+Score:
+{score}/10
+
+Evaluator feedback:
+{feedback}
+
+Weaknesses identified:
+{weaknesses}
+
+Number of follow-up questions already asked on this topic:
+{follow_up_count}
+
+Topics already covered:
+{covered_topics}
+
+Previously asked questions:
+{previous_questions}
+
+
+DECISION RULES:
+
+1. Choose "follow_up" if the candidate's answer has an important
+   weakness, missing concept, or incomplete explanation that can
+   be meaningfully tested with ONE more question.
+
+2. Choose "new_topic" if:
+   - the answer is strong,
+   - the topic has been sufficiently tested,
+   - or another topic would provide better interview coverage.
+
+3. Never ask more than 2 follow-up questions on the same topic.
+
+4. If follow_up_count is already 2, you MUST choose "new_topic".
+
+5. When choosing "new_topic", select a technical topic that:
+   - exists in the candidate's skills or projects,
+   - has not been sufficiently covered,
+   - is relevant for a technical interview.
+
+6. Do not choose a topic that has already been heavily tested
+   unless necessary.
+
+7. If the answer is completely irrelevant or incorrect, a follow-up
+   may be useful to check whether the candidate actually understands
+   the topic. However, do not keep repeating the same topic forever.
+
+8. Do not generate the actual interview question.
+
+Return ONLY valid JSON.
+
+Return exactly:
+
+{{
+    "next_action": "follow_up" or "new_topic",
+    "next_topic": "technical topic",
+    "reason": "short explanation of why this decision was made"
+}}
+"""
+
+
+    # --------------------------------------------------
+    # 5. Call LLM
+    # --------------------------------------------------
+
+    response = llm.invoke(prompt)
+
+
+    # --------------------------------------------------
+    # 6. Parse JSON
+    # --------------------------------------------------
+
+    decision = json.loads(response.content)
+
+
+    next_action = decision["next_action"]
+    next_topic = decision["next_topic"]
+
+
+    # --------------------------------------------------
+    # 7. Update follow-up count
+    # --------------------------------------------------
+
+    if next_action == "follow_up":
+
+        updated_follow_up_count = follow_up_count + 1
+
+    else:
+
+        updated_follow_up_count = 0
+
+
+    # --------------------------------------------------
+    # 8. Print decision
+    # --------------------------------------------------
+
+    print("\n" + "=" * 60)
+    print("NEXT INTERVIEW DECISION")
+    print("=" * 60)
+
+    print("\nAction:")
+    print(next_action)
+
+    print("\nNext Topic:")
+    print(next_topic)
+
+    print("\nReason:")
+    print(decision["reason"])
+
+
+    # --------------------------------------------------
+    # 9. Return state
+    # --------------------------------------------------
+
+    return {
+
+        "next_action": next_action,
+
+        "next_topic": next_topic,
+
+        "follow_up_count": updated_follow_up_count
+
+    }

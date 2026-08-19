@@ -6,7 +6,7 @@ class AgentPrepState(TypedDict, total=False):
     # Resume input
     resume_path: str
 
-    # Information extracted from resume
+    # Resume information
     skills: List[str]
     project_summary: str
     experience_level: str
@@ -21,7 +21,7 @@ class AgentPrepState(TypedDict, total=False):
     current_topic: str
     current_difficulty: str
 
-    # Candidate answer
+    # Candidate answers
     current_answer: str
     answer_history: List[str]
 
@@ -31,6 +31,20 @@ class AgentPrepState(TypedDict, total=False):
     strengths: List[str]
     weaknesses: List[str]
 
-    # Overall interview score
+    # Overall scores
     scores: List[float]
     session_score: float
+
+    # Follow-up / next topic
+    topic_history: List[str]
+    next_action: str
+    next_topic: str
+    follow_up_count: int
+    
+    # --------------------------------------------------
+    # Interview configuration
+    # --------------------------------------------------
+
+    difficulty_level: int
+    max_questions: int
+    question_count: int

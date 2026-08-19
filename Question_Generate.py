@@ -69,6 +69,11 @@ Probe:
 
 
 def question_generator_agent(state: AgentPrepState) -> dict:
+    
+    question_count = state.get(
+        "question_count",
+        0
+    )
     """
     LangGraph node.
 
@@ -103,6 +108,10 @@ def question_generator_agent(state: AgentPrepState) -> dict:
     domain = state.get(
         "domain",
         "DSA"
+    )
+    next_topic = state.get(
+    "next_topic",
+    ""
     )
 
     difficulty_level = state.get(
@@ -210,6 +219,8 @@ Important rules:
 
 10. Generate ONLY the question, not an explanation.
 
+11. If a specific "Next topic to ask about" is provided, the question MUST be about that topic.
+
 
 
 {avoid_section}
@@ -237,6 +248,8 @@ Return exactly:
     # --------------------------------------------------
 
     generated = json.loads(response.content)
+    
+    question_count += 1
 
     # --------------------------------------------------
     # 7. Update question history
@@ -263,10 +276,21 @@ Return exactly:
     # --------------------------------------------------
     # 8. Return updated state
     # --------------------------------------------------
+    
+    topic_history = state.get(
+    "topic_history",
+    []
+    )
+    updated_topic_history = (
+    topic_history
+    + [generated["topic"]]
+    )
 
     return {
         "current_question": generated["question"],
         "current_topic": generated["topic"],
         "current_difficulty": target_difficulty,
         "question_history": updated_history,
+        "topic_history": updated_topic_history,
+        "question_count": question_count,
     }

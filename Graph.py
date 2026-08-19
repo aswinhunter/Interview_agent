@@ -5,6 +5,8 @@ from Resume_Parser_Aagent import resume_parser_agent
 from Question_Generate import question_generator_agent
 from Answer_Capture import answer_capture_agent
 from Answer_Evaluator import answer_evaluator_agent
+from Follow_Up_Decision import follow_up_decision_agent
+from Route_After_Decision import route_after_decision
 
 
 def build_graph():
@@ -25,18 +27,32 @@ def build_graph():
     
     graph.add_node("answer_capture",answer_capture_agent)
     graph.add_node("answer_evaluator",answer_evaluator_agent)
+    graph.add_node("follow_up_decision",follow_up_decision_agent)
     
 
     # --------------------------------------------------
     # Define flow
     # --------------------------------------------------
 
-    graph.add_edge(START,"resume_parser")
+    graph.add_edge(START, "resume_parser")
 
-    graph.add_edge("resume_parser","question_generator")
-    graph.add_edge("question_generator","answer_capture")
-    graph.add_edge("answer_capture","answer_evaluator")
-    graph.add_edge("answer_evaluator",END)
+    graph.add_edge("resume_parser", "question_generator")
+
+    graph.add_edge("question_generator", "answer_capture")
+
+    graph.add_edge("answer_capture", "answer_evaluator")
+
+    graph.add_edge("answer_evaluator", "follow_up_decision")
+
+# Conditional: either continue or END
+    graph.add_conditional_edges(
+        "follow_up_decision",
+        route_after_decision,
+        {
+            "continue": "question_generator",
+            "end": END
+        }
+    )
 
     # --------------------------------------------------
     # Compile graph
