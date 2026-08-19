@@ -246,6 +246,19 @@ Return exactly:
         question_history
         + [generated["question"]]
     )
+    
+    print("\n" + "=" * 60)
+    print("INTERVIEW QUESTION")
+    print("=" * 60)
+
+    print("\nTopic:")
+    print(generated["topic"])
+
+    print("\nDifficulty:")
+    print(target_difficulty)
+
+    print("\nQuestion:")
+    print(generated["question"])
 
     # --------------------------------------------------
     # 8. Return updated state

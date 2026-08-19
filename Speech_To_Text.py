@@ -6,7 +6,6 @@ def speech_to_text() -> str:
     Records audio from the microphone
     and converts it into text using Whisper.
     """
-    print("hii")
 
     import sounddevice as sd
     from scipy.io.wavfile import write
@@ -16,7 +15,7 @@ def speech_to_text() -> str:
     model = whisper.load_model("base")
 
     sample_rate = 16000
-    duration = 10
+    duration = 20
 
     print("\nSpeak your answer...")
     print(f"You have {duration} seconds.")

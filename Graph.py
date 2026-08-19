@@ -3,6 +3,7 @@ from langgraph.graph import StateGraph, START, END
 from State import AgentPrepState
 from Resume_Parser_Aagent import resume_parser_agent
 from Question_Generate import question_generator_agent
+from Answer_Capture import answer_capture_agent
 
 
 def build_graph():
@@ -20,6 +21,9 @@ def build_graph():
     graph.add_node("resume_parser",resume_parser_agent)
 
     graph.add_node("question_generator",question_generator_agent)
+    
+    graph.add_node("answer_capture",answer_capture_agent)
+    
 
     # --------------------------------------------------
     # Define flow
@@ -28,8 +32,8 @@ def build_graph():
     graph.add_edge(START,"resume_parser")
 
     graph.add_edge("resume_parser","question_generator")
-
-    graph.add_edge("question_generator",END)
+    graph.add_edge("question_generator","answer_capture")
+    graph.add_edge("answer_capture",END)
 
     # --------------------------------------------------
     # Compile graph
@@ -94,17 +98,6 @@ if __name__ == "__main__":
     print("\nProject Summary:")
     print(result["project_summary"])
 
-    print("\n" + "=" * 60)
-    print("GENERATED INTERVIEW QUESTION")
-    print("=" * 60)
-
-    print("\nTopic:")
-    print(result["current_topic"])
-
-    print("\nDifficulty:")
-    print(result["current_difficulty"])
-
-    print("\nQuestion:")
-    print(result["current_question"])
+    
 
     print("\n" + "=" * 60)
