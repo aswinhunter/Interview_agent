@@ -48,3 +48,9 @@ class AgentPrepState(TypedDict, total=False):
     difficulty_level: int
     max_questions: int
     question_count: int
+    
+    # Follow-up configuration
+    
+    
+    max_follow_ups: int
+    follow_up_count: int

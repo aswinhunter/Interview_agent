@@ -89,6 +89,16 @@ if __name__ == "__main__":
         "scores": [],
 
         "session_score": 0.0,
+        # TOTAL questions in the interview
+        "max_questions": 10,
+
+    # Maximum follow-up questions on one topic
+        "max_follow_ups": 2,
+
+        "question_count": 0,
+
+        "follow_up_count": 0,
+
     }
 
     # --------------------------------------------------
