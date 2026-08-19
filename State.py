@@ -2,6 +2,7 @@ from typing import List, TypedDict
 
 
 class AgentPrepState(TypedDict, total=False):
+
     # Resume input
     resume_path: str
 
@@ -20,7 +21,12 @@ class AgentPrepState(TypedDict, total=False):
     current_topic: str
     current_difficulty: str
 
-    # Future answer evaluation
+    # Candidate answer
     current_answer: str
+    answer_history: List[str]
+
+    # Answer evaluation
+    score: float
+    feedback: str
     scores: List[float]
     session_score: float
