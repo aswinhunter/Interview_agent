@@ -28,5 +28,9 @@ class AgentPrepState(TypedDict, total=False):
     # Answer evaluation
     score: float
     feedback: str
+    strengths: List[str]
+    weaknesses: List[str]
+
+    # Overall interview score
     scores: List[float]
     session_score: float

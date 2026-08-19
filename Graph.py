@@ -4,6 +4,7 @@ from State import AgentPrepState
 from Resume_Parser_Aagent import resume_parser_agent
 from Question_Generate import question_generator_agent
 from Answer_Capture import answer_capture_agent
+from Answer_Evaluator import answer_evaluator_agent
 
 
 def build_graph():
@@ -23,6 +24,7 @@ def build_graph():
     graph.add_node("question_generator",question_generator_agent)
     
     graph.add_node("answer_capture",answer_capture_agent)
+    graph.add_node("answer_evaluator",answer_evaluator_agent)
     
 
     # --------------------------------------------------
@@ -33,7 +35,8 @@ def build_graph():
 
     graph.add_edge("resume_parser","question_generator")
     graph.add_edge("question_generator","answer_capture")
-    graph.add_edge("answer_capture",END)
+    graph.add_edge("answer_capture","answer_evaluator")
+    graph.add_edge("answer_evaluator",END)
 
     # --------------------------------------------------
     # Compile graph

@@ -39,7 +39,7 @@ def speech_to_text() -> str:
         audio
     )
 
-    print("Transcribing...")
+    
 
     result = model.transcribe(
         audio_file,
